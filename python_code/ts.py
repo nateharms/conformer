@@ -237,7 +237,15 @@ def get_ts_torsion_energies(tsRDMol, delta):
 
 def get_lowest_ts_energy_conformers(tsRDMol, delta):
     """
-    A function that can return
+    A function that returns a dict of the lowest energy conformers calculated in a variety of different ways
+
+    Inputs:
+    * tsRDMol: a rdkit molecule object of your TS
+    * delta: `int` that describes the increment for the scan
+
+    Outputs:
+    * conformer_dict: `dict` containing optimization energies and molecules corresponding to
+                     three differnet calculators
 
     """
 
