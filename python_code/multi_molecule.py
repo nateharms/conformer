@@ -309,16 +309,12 @@ class Multi_Molecule():
         conf = self.rdkit_molecule.GetConformers()[0]
         ase_atoms = []
         for i, atom in enumerate(self.rmg_molecule.atoms):
-            coords = atom.coords
-            x,y,z = coords
+            x,y,z = atom.coords
             symbol = atom.symbol
 
-            conf.SetAtomPosition(i, coords)
+            conf.SetAtomPosition(i, [x,y,z])
 
 
             ase_atoms.append(Atom(symbol=symbol, position=(x, y, z)))
 
         self.ase_molecule = Atoms(ase_atoms)
-
-
-
