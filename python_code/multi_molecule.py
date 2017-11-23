@@ -1,12 +1,12 @@
-import ase
-from ase import Atom, Atoms
-import rmgpy
-from rmgpy.molecule import Molecule
 import rdkit
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem.rdchem import Mol
 from rdkit.Chem.rdMolTransforms import *
+import ase
+from ase import Atom, Atoms
+import rmgpy
+from rmgpy.molecule import Molecule
 import py3Dmol
 import numpy as np
 from numpy import pi
@@ -47,10 +47,10 @@ class Multi_Molecule():
 
         self.get_rmg_molecule()
         self.get_rdkit_molecule()
+        self.set_rmg_coords("RDKit")
         self.get_ase_molecule()
         self.get_torsion_list()
         self.get_torsions()
-
 
 
     def get_rmg_molecule(self):
@@ -184,15 +184,15 @@ class Multi_Molecule():
     def get_torsions(self):
         torsions = []
         for indices in self.torsion_list:
-            i,j,k,l = indices
+            i, j, k, l = indices
 
-            dihedral = self.ase_molecule.get_dihedral(indices)
+            dihedral = self.ase_molecule.get_dihedral(i,j,k,l)
             tor = Torsion(indices=indices, dihedral=dihedral, LHS=[], RHS=[])
             LHS = self.get_LHS(tor)
             RHS = self.get_RHS(tor)
 
-            Torsions.append(Torsion(indices, dihedral, LHS, RHS))
-        self.Torsions = torsions
+            torsions.append(Torsion(indices, dihedral, LHS, RHS))
+        self.torsions = torsions
         return self.torsions
 
     def get_LHS(self, Torsion):
@@ -260,3 +260,65 @@ class Multi_Molecule():
                 complete_RHS = True
 
         return RHS_atoms_index
+
+    def set_rmg_coords(self, molecule_base):
+
+        if molecule_base == "RDKit":
+            mol_list = AllChem.MolToMolBlock(self.rdkit_molecule).split('\n')
+            for i, atom in enumerate(self.rmg_molecule.atoms):
+
+                j = i + 4
+                coords = mol_list[j].split()[:3]
+
+                for k, coord in enumerate(coords):
+
+                    coords[k] = float(coord)
+                atom.coords = np.array(coords)
+
+        elif molecule_base == "ASE":
+            for i, position in enumerate(self.ase_molecule.get_positions()):
+                self.rmg_molecule.atoms[i].coords = position
+
+
+
+
+    def update_geometry_from_rdkit_mol(self):
+        # In order to update the ase molecule you simply need to rerun the get_ase_molecule method
+        self.get_ase_molecule()
+        self.set_rmg_coords("RDKit")
+
+
+
+    def update_geometry_from_ase_mol(self):
+
+        self.set_rmg_coords("ASE")
+
+        #setting the geometries of the rdkit molecule
+
+        positions = self.ase_molecule.get_positions()
+
+        conf = self.rdkit_molecule.GetConformers()[0]
+
+        for i, atom in enumerate(self.rdkit_molecule.GetAtoms()):
+            conf.SetAtomPosition(i, positions[i])
+
+
+    def update_geometry_from_rmg_mol(self):
+        # I don't know why you would ever want to do this, but okay...
+
+        conf = self.rdkit_molecule.GetConformers()[0]
+        ase_atoms = []
+        for i, atom in enumerate(self.rmg_molecule.atoms):
+            coords = atom.coords
+            x,y,z = coords
+            symbol = atom.symbol
+
+            conf.SetAtomPosition(i, coords)
+
+
+            ase_atoms.append(Atom(symbol=symbol, position=(x, y, z)))
+
+        self.ase_molecule = Atoms(ase_atoms)
+
+
+
