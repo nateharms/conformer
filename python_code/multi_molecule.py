@@ -42,8 +42,6 @@ class Multi_Molecule():
 
         self.smiles = smiles
 
-        # Make these more explicit (make rmg mol from smiles)
-
         self.get_rmg_molecule()
         self.get_rdkit_molecule()
         self.set_rmg_coords("RDKit")
@@ -57,6 +55,7 @@ class Multi_Molecule():
         A method to obtain and set the RMG Molecule
         """
         self.rmg_molecule = Molecule(SMILES=self.smiles)
+
     def get_rdkit_molecule(self):
         """
         A method to create an RDKit Molecule from the rmg_molecule.
