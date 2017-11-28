@@ -49,7 +49,7 @@ rmg_database.load(database_path,
                  solvation=False,
                  )
 
-f = open("../ts_database.pkl", "r")
+f = open("/Users/nathan/Code/ga_conformer/python_code/ts_database.pkl", "r")
 ts_database = pkl.load(f)
 
 settings = QMSettings(
@@ -190,18 +190,20 @@ class Multi_TS():
         self.create_rdkit_ts_geometry()
         self.create_ase_ts_geometry()
         self.create_rmg_ts_geometry()
+        self.get_ts_torsion_list()
+        self.get_ts_torsions()
 
     def create_rdkit_ts_geometry(self):
 
-        self.rmg_ts, _ = self.multi_reaction.rmg_qm_reaction.setupMolecules()
+        self.rmg_ts, product = self.multi_reaction.rmg_qm_reaction.setupMolecules()
 
         labels, atom_match = self.multi_reaction.rmg_qm_reaction.getLabels(self.rmg_ts)
 
-        rdkit_ts, bm, self.multi_reaction.rmg_qm_reaction.reactantGeom = self.multi_reaction.rmg_qm_reaction.generateBoundsMatrix(self.rmg_ts)
+        self.rdkit_ts, bm, self.multi_reaction.rmg_qm_reaction.reactantGeom = self.multi_reaction.rmg_qm_reaction.generateBoundsMatrix(self.rmg_ts)
 
         bm = self.multi_reaction.rmg_qm_reaction.editMatrix(self.rmg_ts, bm, labels)
 
-        self.rdkit_ts = self.multi_reaction.rmg_qm_reaction.reactantGeom.rd_embed(rdkit_ts, 15, bm=bm, match=atom_match)[0]
+        self.rdkit_ts = self.multi_reaction.rmg_qm_reaction.reactantGeom.rd_embed(self.rdkit_ts, 15, bm=bm, match=atom_match)[0]
 
         #os.remove("*.mol") #removing unnecessary .mol files
 
@@ -239,3 +241,177 @@ class Multi_TS():
         for i, position in enumerate(self.ase_ts.get_positions()):
             self.rmg_ts.atoms[i].coords = position
 
+    def view_ts(self):
+        """
+        A method designed to create a 3D figure of the Multi_Molecule with py3Dmol
+        """
+
+        mb  = Chem.MolToMolBlock(self.rdkit_ts)
+        p = py3Dmol.view(width=400, height=400)
+        p.addModel(mb, "sdf")
+        p.setStyle({'stick':{}})
+        p.setBackgroundColor('0xeeeeee')
+        p.zoomTo()
+        return p.show()
+
+    def get_ts_torsion_list(self):
+
+        rdmol_copy = self.rdkit_ts.__copy__()
+        rdmol_copy = Chem.RWMol(rdmol_copy)
+        for atom in rdmol_copy.GetAtoms():
+            idx = atom.GetIdx()
+            num = atom.GetAtomicNum()
+            rmg_atom = self.rmg_ts.atoms[idx]
+
+            if rmg_atom.label:
+                if rmg_atom.label == "*1":
+                    atom1_star = atom
+                if rmg_atom.label == "*2":
+                    atom2_star = atom
+                if rmg_atom.label == "*3":
+                    atom3_star = atom
+
+
+        try:
+            rdmol_copy.AddBond(atom1_star.GetIdx(), atom2_star.GetIdx(), order=rdkit.Chem.rdchem.BondType.SINGLE)
+        except RuntimeError:
+            # print "Bond already exists between 1* and 2*"
+
+            rdmol_copy.AddBond(atom2_star.GetIdx(), atom3_star.GetIdx(), order=rdkit.Chem.rdchem.BondType.SINGLE)
+
+        torsion_list = []
+        for bond1 in rdmol_copy.GetBonds():
+            atom1 = bond1.GetBeginAtom()
+            atom2 = bond1.GetEndAtom()
+            if atom1.IsInRing() or atom2.IsInRing():
+                # Making sure that bond1 we're looking at are in a ring
+                continue
+
+            bond_list1 = list(atom1.GetBonds())
+            bond_list2 = list(atom2.GetBonds())
+
+            if not len(bond_list1) > 1 and not len(bond_list2) > 1:
+                # Making sure that there are more than one bond attached to
+                # the atoms we're looking at
+                continue
+
+            # Getting the 0th and 3rd atom and insuring that atoms
+            # attached to the 1st and 2nd atom are not terminal hydrogens
+            # We also make sure that all of the atoms are properly bound together
+
+            # If the above are satisified, we append a tuple of the torsion our torsion_list
+            got_atom0 = False
+            got_atom3 = False
+
+            for bond0 in bond_list1:
+                atomX = bond0.GetOtherAtom(atom1)
+                if atomX.GetAtomicNum() == 1 and len(atomX.GetBonds()) == 1:
+                    # This means that we have a terminal hydrogen, skip this
+                    # NOTE: for H_abstraction TSs, a non teminal H should exist
+                    continue
+                if atomX.GetIdx() != atom2.GetIdx():
+                    got_atom0 = True
+                    atom0 = atomX
+
+            for bond2 in bond_list2:
+                atomY = bond2.GetOtherAtom(atom2)
+                if atomY.GetAtomicNum() == 1 and len(atomY.GetBonds()) == 1:
+                    # This means that we have a terminal hydrogen, skip this
+                    continue
+                if atomY.GetIdx() != atom1.GetIdx():
+                    got_atom3 = True
+                    atom3 = atomY
+
+            if not (got_atom0 and got_atom3):
+                # Making sure atom0 and atom3 were not found
+                continue
+
+            # Looking to make sure that all of the atoms are properly bonded to eached
+            if (
+                            rdmol_copy.GetBondBetweenAtoms(atom0.GetIdx(), atom1.GetIdx()) and
+                            rdmol_copy.GetBondBetweenAtoms(atom1.GetIdx(), atom2.GetIdx()) and
+                        rdmol_copy.GetBondBetweenAtoms(atom2.GetIdx(), atom3.GetIdx())):
+                torsion_tup = (atom0.GetIdx(), atom1.GetIdx(), atom2.GetIdx(), atom3.GetIdx())
+                torsion_list.append(torsion_tup)
+
+        self.torsion_list = torsion_list
+
+    def get_ts_torsions(self):
+        torsions = []
+        for indices in self.torsion_list:
+            i, j, k, l = indices
+
+            dihedral = self.ase_ts.get_dihedral(i, j, k, l)
+            tor = Torsion(indices=indices, dihedral=dihedral, LHS=[], RHS=[])
+            LHS = self.get_ts_LHS(tor)
+            RHS = self.get_ts_RHS(tor)
+
+            torsions.append(Torsion(indices, dihedral, LHS, RHS))
+        self.torsions = torsions
+        return self.torsions
+
+    def get_ts_RHS(self, Torsion):
+
+        rdkit_atoms = self.rdkit_ts.GetAtoms()
+
+        L1, L0, R0, R1 = Torsion.indices
+        rd_atom_L1 = rdkit_atoms[L1]
+        rd_atom_L0 = rdkit_atoms[L0]
+        rd_atom_R0 = rdkit_atoms[R0]
+        rd_atom_R1 = rdkit_atoms[R1]
+
+        # trying to get the left hand side of this torsion
+        LHS_atoms_index = [rd_atom_L0.GetIdx(), rd_atom_L1.GetIdx()]
+        RHS_atoms_index = [rd_atom_R0.GetIdx(), rd_atom_R1.GetIdx()]
+
+        complete_RHS = False
+        i = 0
+        atom_index = RHS_atoms_index[0]
+        while complete_RHS == False:
+            try:
+                RHS_atom = rdkit_atoms[atom_index]
+                for neighbor in RHS_atom.GetNeighbors():
+                    if (neighbor.GetIdx() in RHS_atoms_index) or (neighbor.GetIdx() in LHS_atoms_index):
+                        continue
+                    else:
+                        RHS_atoms_index.append(neighbor.GetIdx())
+                i +=1
+                atom_index = RHS_atoms_index[i]
+
+            except IndexError:
+                complete_RHS = True
+
+        return RHS_atoms_index
+
+    def get_ts_LHS(self, Torsion):
+
+        rdkit_atoms = self.rdkit_ts.GetAtoms()
+
+        L1, L0, R0, R1 = Torsion.indices
+        rd_atom_L1 = rdkit_atoms[L1]
+        rd_atom_L0 = rdkit_atoms[L0]
+        rd_atom_R0 = rdkit_atoms[R0]
+        rd_atom_R1 = rdkit_atoms[R1]
+
+        # trying to get the left hand side of this torsion
+        LHS_atoms_index = [rd_atom_L0.GetIdx(), rd_atom_L1.GetIdx()]
+        RHS_atoms_index = [rd_atom_R0.GetIdx(), rd_atom_R1.GetIdx()]
+
+        complete_LHS = False
+        i = 0
+        atom_index = LHS_atoms_index[0]
+        while complete_LHS == False:
+            try:
+                LHS_atom = rdkit_atoms[atom_index]
+                for neighbor in LHS_atom.GetNeighbors():
+                    if (neighbor.GetIdx() in LHS_atoms_index) or (neighbor.GetIdx() in RHS_atoms_index):
+                        continue
+                    else:
+                        LHS_atoms_index.append(neighbor.GetIdx())
+                i +=1
+                atom_index = LHS_atoms_index[i]
+
+            except IndexError:
+                complete_LHS = True
+
+        return LHS_atoms_index
