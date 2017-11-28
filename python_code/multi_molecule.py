@@ -30,7 +30,6 @@ class Torsion():
 
 
 
-
 class Multi_Molecule():
     """
     A class that allows for one to create RMG, RDKit and ASE
@@ -287,6 +286,9 @@ class Multi_Molecule():
         self.get_ase_molecule()
         self.set_rmg_coords("RDKit")
 
+        # Getting the new torsion angles
+        self.get_torsions()
+
 
 
     def update_geometry_from_ase_mol(self):
@@ -301,6 +303,9 @@ class Multi_Molecule():
 
         for i, atom in enumerate(self.rdkit_molecule.GetAtoms()):
             conf.SetAtomPosition(i, positions[i])
+
+        # Getting the new torsion angles
+        self.get_torsions()
 
 
     def update_geometry_from_rmg_mol(self):
@@ -318,3 +323,7 @@ class Multi_Molecule():
             ase_atoms.append(Atom(symbol=symbol, position=(x, y, z)))
 
         self.ase_molecule = Atoms(ase_atoms)
+
+        # Getting the new torsion angles
+        self.get_torsions()
+

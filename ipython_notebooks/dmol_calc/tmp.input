@@ -1,0 +1,9 @@
+calculate                        gradient
+print                            eigval_last_it
+symmetry                         auto
+basis                            dnp
+pseudopotential                  none
+functional                       pbe
+spin_polarization                unrestricted
+charge                           0
+scf_density_convergence          1e-07

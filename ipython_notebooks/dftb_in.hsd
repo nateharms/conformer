@@ -1,0 +1,22 @@
+Geometry = GenFormat { 
+    <<< "geo_end.gen" 
+} 
+ 
+Driver = ConjugateGradient{ 
+   MaxForceComponent = 1E-4 
+   MaxSteps = 0 
+   } 
+Hamiltonian = DFTB{ 
+   MaxAngularMomentum = { 
+   SlaterKosterFiles = Type2FileNames{ 
+      Prefix = ./ 
+      Separator = "-" 
+      Suffix = ".skf" 
+   } 
+} 
+Options { 
+   WriteResultsTag = Yes  
+} 
+ParserOptions { 
+   IgnoreUnprocessedNodes = Yes  
+} 
