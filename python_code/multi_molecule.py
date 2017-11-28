@@ -9,7 +9,6 @@ import rmgpy
 from rmgpy.molecule import Molecule
 import py3Dmol
 import numpy as np
-from numpy import pi
 
 class Torsion():
     """

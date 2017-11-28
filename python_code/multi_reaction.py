@@ -415,3 +415,64 @@ class Multi_TS():
                 complete_LHS = True
 
         return LHS_atoms_index
+
+    def set_rmg_ts_coords(self, molecule_base):
+
+        if molecule_base == "RDKit":
+            mol_list = AllChem.MolToMolBlock(self.rdkit_ts).split('\n')
+            for i, atom in enumerate(self.rmg_ts.atoms):
+
+                j = i + 4
+                coords = mol_list[j].split()[:3]
+
+                for k, coord in enumerate(coords):
+
+                    coords[k] = float(coord)
+                atom.coords = np.array(coords)
+
+        elif molecule_base == "ASE":
+            for i, position in enumerate(self.ase_ts.get_positions()):
+                self.rmg_ts.atoms[i].coords = position
+
+    def update_ts_from_rdkit_ts(self):
+        # In order to update the ase molecule you simply need to rerun the get_ase_molecule method
+        self.create_ase_ts_geometry()
+        self.set_rmg_ts_coords("RDKit")
+
+        # Getting the new torsion angles
+        self.get_ts_torsions()
+
+    def update_ts_from_ase_ts(self):
+
+        self.set_rmg_ts_coords("ASE")
+
+        #setting the geometries of the rdkit molecule
+
+        positions = self.ase_ts.get_positions()
+
+        conf = self.rdkit_ts.GetConformers()[0]
+
+        for i, atom in enumerate(self.rdkit_ts.GetAtoms()):
+            conf.SetAtomPosition(i, positions[i])
+
+        # Getting the new torsion angles
+        self.get_ts_torsions()
+
+
+    def update_ts_from_rmg(self):
+        # I don't know why you would ever want to do this, but okay...
+
+        conf = self.rdkit_ts.GetConformers()[0]
+        ase_atoms = []
+        for i, atom in enumerate(self.rmg_ts.atoms):
+            x,y,z = atom.coords
+            symbol = atom.symbol
+
+            conf.SetAtomPosition(i, [x,y,z])
+
+            ase_atoms.append(Atom(symbol=symbol, position=(x, y, z)))
+
+        self.ase_ts = Atoms(ase_atoms)
+
+        # Getting the new torsion angles
+        self.get_ts_torsion_list()
