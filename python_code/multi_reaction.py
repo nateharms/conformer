@@ -254,7 +254,7 @@ class Multi_TS():
         p.zoomTo()
         return p.show()
 
-    def get_ts_torsion_list(self):
+    def create_pseudo_geometry(self):
 
         rdmol_copy = self.rdkit_ts.__copy__()
         rdmol_copy = Chem.RWMol(rdmol_copy)
@@ -271,13 +271,18 @@ class Multi_TS():
                 if rmg_atom.label == "*3":
                     atom3_star = atom
 
-
         try:
             rdmol_copy.AddBond(atom1_star.GetIdx(), atom2_star.GetIdx(), order=rdkit.Chem.rdchem.BondType.SINGLE)
         except RuntimeError:
             # print "Bond already exists between 1* and 2*"
 
             rdmol_copy.AddBond(atom2_star.GetIdx(), atom3_star.GetIdx(), order=rdkit.Chem.rdchem.BondType.SINGLE)
+
+        return rdmol_copy
+
+    def get_ts_torsion_list(self):
+
+        rdmol_copy = self.create_pseudo_geometry()
 
         torsion_list = []
         for bond1 in rdmol_copy.GetBonds():
@@ -352,7 +357,9 @@ class Multi_TS():
 
     def get_ts_RHS(self, Torsion):
 
-        rdkit_atoms = self.rdkit_ts.GetAtoms()
+        rdmol_copy = self.create_pseudo_geometry()
+
+        rdkit_atoms = rdmol_copy.GetAtoms()
 
         L1, L0, R0, R1 = Torsion.indices
         rd_atom_L1 = rdkit_atoms[L1]
@@ -385,7 +392,9 @@ class Multi_TS():
 
     def get_ts_LHS(self, Torsion):
 
-        rdkit_atoms = self.rdkit_ts.GetAtoms()
+        rdmol_copy = self.create_pseudo_geometry()
+
+        rdkit_atoms = rdmol_copy.GetAtoms()
 
         L1, L0, R0, R1 = Torsion.indices
         rd_atom_L1 = rdkit_atoms[L1]

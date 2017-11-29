@@ -1,7 +1,0 @@
-dict(basis='dnp',
-     charge=0,
-     functional='pbe',
-     pseudopotential='none',
-     scf_density_convergence=1e-07,
-     spin_polarization='unrestricted',
-     symmetry='auto')
