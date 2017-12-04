@@ -26,6 +26,3 @@ perform_simple_es(mol,
                   max_generations=5,
                   store_generations=True)
 
-
-
-

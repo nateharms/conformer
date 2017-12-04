@@ -38,7 +38,7 @@ from ase.calculators.emt import *
 
 from copy import deepcopy
 
-def create_initial_population(multi_object, calc=None, delta=30, population_size=200):
+def create_initial_population(multi_object, delta=30, population_size=200):
     """
     A function designed to take a multi_molecule, multi_rxn or multi_ts object
     and create an initial population of conformers.
@@ -55,16 +55,12 @@ def create_initial_population(multi_object, calc=None, delta=30, population_size
 
     df = None
 
-    if not calc:
-        calc = EMT()
-
     possible_dihedrals = np.arange(0, 360, delta)
     population = []
 
     if "Multi_Molecule" in str(multi_object.__class__):
 
         mol = multi_object
-        mol.ase_molecule.set_calculator(calc)
 
         for indivudual in range(population_size):
             dihedrals = []
@@ -93,8 +89,6 @@ def create_initial_population(multi_object, calc=None, delta=30, population_size
 
         TS = multi_object.multi_ts
 
-        TS.ase_ts.set_calculator(calc)
-
         for i in range(population_size):
             dihedrals = []
 
@@ -121,8 +115,6 @@ def create_initial_population(multi_object, calc=None, delta=30, population_size
 
     elif "Multi_TS" in str(multi_object.__class__):
         TS = multi_object
-
-        TS.ase_ts.set_calculator(calc)
 
         for i in range(population_size):
             dihedrals = []
