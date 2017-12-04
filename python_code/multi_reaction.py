@@ -468,7 +468,7 @@ class Multi_TS():
         self.get_ts_torsions()
 
 
-    def update_ts_from_rmg(self):
+    def update_ts_from_rmg_ts(self):
         # I don't know why you would ever want to do this, but okay...
 
         conf = self.rdkit_ts.GetConformers()[0]
