@@ -34,6 +34,7 @@ from ase import Atom, Atoms
 
 from multi_molecule import *
 from multi_reaction import *
+from utilities import *
 
 from ase.calculators.morse import * #chosing this calculator for now because it's fast
 from ase.calculators.dftb import *
@@ -42,17 +43,14 @@ from ase.calculators.emt import *
 
 import cPickle as pickle
 
-from copy import deepcopy
-
-from ga import create_initial_population, select_top_population
-
 
 def perform_simple_es(multi_object,
                       df,
                       top_percent=0.3,
                       tolerance=1e-4,
-                      max_generations=0,
-                      store_generations=False):
+                      max_generations=np.inf,
+                      store_generations=False,
+                      store_directory="."):
     """
     Performs a simple evolutionary strategy to determine the lowest energy conformer of a TS or molecule
 
@@ -63,14 +61,15 @@ def perform_simple_es(multi_object,
     :param tolerance: float of one of the possible cut off points for the analysis
     :param max_generations: int of one of the possible cut off points for the analysis
     :param store_generations: do you want to store pickle files of each generation
+    :param store_directory: the director where you want the pickle files stored
     :return df: a DataFrame containing the final generation
     """
     top = select_top_population(df,
                                 top_percent=top_percent
                                 )
-    top_population = top.shape[1]
+    top_population = top.shape[0]
 
-    population_size = df.shape[1]
+    population_size = df.shape[0]
 
     # Takes each of the molecule objects
     if "Multi_Molecule" in str(multi_object.__class__):
@@ -86,13 +85,10 @@ def perform_simple_es(multi_object,
         torsions = multi_object.torsions
 
     gen_number = 0
-    generation_tracker = 0
-    while (top.std()[0] / top.mean()[0] > tolerance) or (gen_number <= max_generations):
-        generation_tracker = generation_tracker + 1
-        if max_generations > 0:
-            # If the user sets a number of max generations, this will keep track of that and break
-            # once the number of max generations is reached
-            gen_number = gen_number + 1
+    complete = False
+    while complete == False:
+        gen_number += 1
+        logging.info("Performing Simple ES on generation {}".format(gen_number))
 
         results = []
         for individual in range(population_size):
@@ -104,11 +100,12 @@ def perform_simple_es(multi_object,
                 dihedral = random.gauss(top.mean()[index + 1], top.std()[index + 1])
                 dihedrals.append(dihedral)
                 ase_object.set_dihedral(a1=i,
-                                                     a2=j,
-                                                     a3=k,
-                                                     a4=l,
-                                                     angle=float(dihedral),
-                                                     indices=RHS)
+                                        a2=j,
+                                        a3=k,
+                                        a4=l,
+                                        angle=float(dihedral),
+                                        indices=RHS)
+
                 # Updating the molecule
                 if "Multi_Molecule" in str(multi_object.__class__):
                     multi_object.update_geometry_from_ase_mol()
@@ -123,9 +120,10 @@ def perform_simple_es(multi_object,
             results.append([e] + dihedrals)
 
         df = pd.DataFrame(results)
+        logging.info("Creating the DataFrame of results for the {}th generation".format(gen_number))
 
         columns = ["Energy"]
-        for i in range(len(multi_object.torsion_list)):
+        for i in range(len(torsions)):
             columns = columns + ["Torsion " + str(i)]
 
         df.columns = columns
@@ -133,20 +131,29 @@ def perform_simple_es(multi_object,
 
         if store_generations == True:
             # This portion stores each generation if desired
-            generation_name = "simple_es_generation_{}.pkl".format(generation_tracker)
 
-            f = open(generation_name, "w")
+            if "Multi_Reaction" in str(multi_object.__class__):
+                generation_name = "rxn_simple_es_generation_{}.pkl".format(gen_number)
 
+            elif "Multi_Molecule" in str(multi_object.__class__):
+                generation_name = "mol_simple_es_generation_{}.pkl".format(gen_number)
+
+            elif "Multi_TS" in str(multi_object.__class__):
+                generation_name = "ts_simple_es_generation_{}.pkl".format(gen_number)
+
+            else:
+                generation_name = "simple_es_generation_{}.pkl".format(gen_number)
+
+            f = open(os.path.join(store_directory, generation_name), "w")
             pickle.dump(df, f)
+
         top = df.iloc[:int(top_population), :]
 
+        if gen_number >= max_generations:
+            complete = True
+            logging.info("Max generations reached. Simple ES complete.")
+        if top.std()[0] / top.mean()[0] < tolerance:
+            complete = True
+            logging.info("Cutoff criteria reached. Simple ES complete.")
+
     return df
-
-
-
-
-
-
-
-
-

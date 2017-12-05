@@ -1,28 +1,57 @@
+# A test file to act as a tutorial of how this tool works
+
 from multi_molecule import *
 from multi_reaction import *
 from ga import *
 from simple_es import *
-
 from ase.calculators.emt import *
 
-mol = Multi_Molecule("CCOC")
-#mol.ase_molecule.set_calculator(EMT())
+# ~~~~~~~~~~~~~~~~~~~~~~~~~
+# Performing GA and Simple-ES on a molecule
 
+mol = Multi_Molecule("CCCOC")
+mol.ase_molecule.set_calculator(EMT())
 initial_pop = create_initial_population(multi_object=mol)
 
 perform_ga(mol,
            initial_pop,
            top_percent=0.3,
-           #tolerance=0,
+           tolerance=1e-5,
            max_generations=5,
            store_generations=True,
+           store_directory="./example_results",
            mutation_probability=0.2,
            delta=30)
 
 perform_simple_es(mol,
                   initial_pop,
                   top_percent=0.3,
-                  #tolerance=0,
+                  tolerance=1e-5,
                   max_generations=5,
-                  store_generations=True)
+                  store_generations=True,
+                  store_directory="./example_results")
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~
+# Performing GA and Simple-ES on a reaction
+
+rxn = Multi_Reaction("CCCCCCC+[O]O_[CH2]CCCCCC+OO", "H_Abstraction")
+rxn.multi_ts.ase_ts.set_calculator(EMT())
+rxn_initial_pop = create_initial_population(multi_object=rxn)
+
+perform_ga(rxn,
+           rxn_initial_pop,
+           top_percent=0.3,
+           tolerance = 1e-4,
+           max_generations=5,
+           store_generations=True,
+           store_directory="./example_results",
+           mutation_probability=0.2,
+           delta=30)
+
+perform_simple_es(rxn,
+                  rxn_initial_pop,
+                  top_percent=0.3,
+                  tolerance=1e-4,
+                  max_generations=5,
+                  store_generations=True,
+                  store_directory="./example_results")

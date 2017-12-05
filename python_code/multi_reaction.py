@@ -166,8 +166,6 @@ class Multi_Reaction():
         self.rmg_reaction = reaction
         self.rmg_qm_reaction = QMReaction(reaction=reaction, settings=settings, tsDatabase=ts_database)
 
-
-
     def create_ts_geometries(self):
         """
         A method to use the tools in rmg / autotst to create a reasonable TS geometry
@@ -177,7 +175,6 @@ class Multi_Reaction():
         self.multi_ts: a multi_ts object that contains geometries of a ts in
                         rdkit, ase, and rmg molecules
         """
-
         self.multi_ts = Multi_TS(self)
 
 
@@ -185,7 +182,7 @@ class Multi_TS():
     def __init__(self, Multi_Reaction):
 
         self.multi_reaction = Multi_Reaction
-        self.label = Multi_Reaction.label #make sure that both the reaction and TS have same label
+        self.label = Multi_Reaction.label  # make sure that both the reaction and TS have same label
 
         self.create_rdkit_ts_geometry()
         self.create_ase_ts_geometry()
@@ -204,8 +201,6 @@ class Multi_TS():
         bm = self.multi_reaction.rmg_qm_reaction.editMatrix(self.rmg_ts, bm, labels)
 
         self.rdkit_ts = self.multi_reaction.rmg_qm_reaction.reactantGeom.rd_embed(self.rdkit_ts, 15, bm=bm, match=atom_match)[0]
-
-        #os.remove("*.mol") #removing unnecessary .mol files
 
     def create_ase_ts_geometry(self):
 
@@ -245,8 +240,7 @@ class Multi_TS():
         """
         A method designed to create a 3D figure of the Multi_Molecule with py3Dmol
         """
-
-        mb  = Chem.MolToMolBlock(self.rdkit_ts)
+        mb = Chem.MolToMolBlock(self.rdkit_ts)
         p = py3Dmol.view(width=400, height=400)
         p.addModel(mb, "sdf")
         p.setStyle({'stick':{}})
@@ -260,7 +254,6 @@ class Multi_TS():
         rdmol_copy = Chem.RWMol(rdmol_copy)
         for atom in rdmol_copy.GetAtoms():
             idx = atom.GetIdx()
-            num = atom.GetAtomicNum()
             rmg_atom = self.rmg_ts.atoms[idx]
 
             if rmg_atom.label:
@@ -274,8 +267,6 @@ class Multi_TS():
         try:
             rdmol_copy.AddBond(atom1_star.GetIdx(), atom2_star.GetIdx(), order=rdkit.Chem.rdchem.BondType.SINGLE)
         except RuntimeError:
-            # print "Bond already exists between 1* and 2*"
-
             rdmol_copy.AddBond(atom2_star.GetIdx(), atom3_star.GetIdx(), order=rdkit.Chem.rdchem.BondType.SINGLE)
 
         return rdmol_copy
@@ -304,7 +295,7 @@ class Multi_TS():
             # attached to the 1st and 2nd atom are not terminal hydrogens
             # We also make sure that all of the atoms are properly bound together
 
-            # If the above are satisified, we append a tuple of the torsion our torsion_list
+            # If the above are satisfied, we append a tuple of the torsion our torsion_list
             got_atom0 = False
             got_atom3 = False
 
@@ -455,7 +446,7 @@ class Multi_TS():
 
         self.set_rmg_ts_coords("ASE")
 
-        #setting the geometries of the rdkit molecule
+        # setting the geometries of the rdkit molecule
 
         positions = self.ase_ts.get_positions()
 
@@ -469,15 +460,14 @@ class Multi_TS():
 
 
     def update_ts_from_rmg_ts(self):
-        # I don't know why you would ever want to do this, but okay...
 
         conf = self.rdkit_ts.GetConformers()[0]
         ase_atoms = []
         for i, atom in enumerate(self.rmg_ts.atoms):
-            x,y,z = atom.coords
+            x, y, z = atom.coords
             symbol = atom.symbol
 
-            conf.SetAtomPosition(i, [x,y,z])
+            conf.SetAtomPosition(i, [x, y, z])
 
             ase_atoms.append(Atom(symbol=symbol, position=(x, y, z)))
 

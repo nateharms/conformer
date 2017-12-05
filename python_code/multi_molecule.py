@@ -40,7 +40,6 @@ class Multi_Molecule():
     def __init__(self, smiles):
 
         self.smiles = smiles
-
         self.get_rmg_molecule()
         self.get_rdkit_molecule()
         self.set_rmg_coords("RDKit")
@@ -112,7 +111,6 @@ class Multi_Molecule():
         p.zoomTo()
         return p.show()
 
-
     def get_torsion_list(self):
         """
         A method to return a list of the possible torsions in a Multi_Molecule.
@@ -139,7 +137,7 @@ class Multi_Molecule():
             # attached to the 1st and 2nd atom are not terminal hydrogens
             # We also make sure that all of the atoms are properly bound together
 
-            # If the above are satisified, we append a tuple of the torsion our torsion_list
+            # If the above are satisfied, we append a tuple of the torsion our torsion_list
             got_atom0 = False
             got_atom3 = False
 
@@ -263,12 +261,9 @@ class Multi_Molecule():
         if molecule_base == "RDKit":
             mol_list = AllChem.MolToMolBlock(self.rdkit_molecule).split('\n')
             for i, atom in enumerate(self.rmg_molecule.atoms):
-
                 j = i + 4
                 coords = mol_list[j].split()[:3]
-
                 for k, coord in enumerate(coords):
-
                     coords[k] = float(coord)
                 atom.coords = np.array(coords)
 
@@ -276,47 +271,35 @@ class Multi_Molecule():
             for i, position in enumerate(self.ase_molecule.get_positions()):
                 self.rmg_molecule.atoms[i].coords = position
 
-
-
-
     def update_geometry_from_rdkit_mol(self):
+
         # In order to update the ase molecule you simply need to rerun the get_ase_molecule method
         self.get_ase_molecule()
         self.set_rmg_coords("RDKit")
-
         # Getting the new torsion angles
         self.get_torsions()
-
-
 
     def update_geometry_from_ase_mol(self):
 
         self.set_rmg_coords("ASE")
-
-        #setting the geometries of the rdkit molecule
-
+        # setting the geometries of the rdkit molecule
         positions = self.ase_molecule.get_positions()
-
         conf = self.rdkit_molecule.GetConformers()[0]
-
         for i, atom in enumerate(self.rdkit_molecule.GetAtoms()):
             conf.SetAtomPosition(i, positions[i])
 
         # Getting the new torsion angles
         self.get_torsions()
 
-
     def update_geometry_from_rmg_mol(self):
-        # I don't know why you would ever want to do this, but okay...
 
         conf = self.rdkit_molecule.GetConformers()[0]
         ase_atoms = []
         for i, atom in enumerate(self.rmg_molecule.atoms):
-            x,y,z = atom.coords
+            x, y, z = atom.coords
             symbol = atom.symbol
 
-            conf.SetAtomPosition(i, [x,y,z])
-
+            conf.SetAtomPosition(i, [x, y, z])
 
             ase_atoms.append(Atom(symbol=symbol, position=(x, y, z)))
 
@@ -324,4 +307,3 @@ class Multi_Molecule():
 
         # Getting the new torsion angles
         self.get_torsions()
-
