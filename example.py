@@ -2,6 +2,7 @@
 
 from multi_molecule import *
 from multi_reaction import *
+from brute_force import *
 from ga import *
 from simple_es import *
 from ase.calculators.emt import *
@@ -12,6 +13,10 @@ from ase.calculators.emt import *
 mol = Multi_Molecule("CCCOC")
 mol.ase_molecule.set_calculator(EMT())
 initial_pop = create_initial_population(multi_object=mol)
+
+perform_brute_force(mol,
+                    delta=float(30),
+                    store_directory="./example_results")
 
 perform_ga(mol,
            initial_pop,
@@ -37,6 +42,10 @@ perform_simple_es(mol,
 rxn = Multi_Reaction("CCCCCCC+[O]O_[CH2]CCCCCC+OO", "H_Abstraction")
 rxn.multi_ts.ase_ts.set_calculator(EMT())
 rxn_initial_pop = create_initial_population(multi_object=rxn)
+
+perform_brute_force(rxn,
+                    delta=float(30),
+                    store_directory="./example_results")
 
 perform_ga(rxn,
            rxn_initial_pop,

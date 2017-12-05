@@ -200,7 +200,7 @@ class Multi_TS():
 
         bm = self.multi_reaction.rmg_qm_reaction.editMatrix(self.rmg_ts, bm, labels)
 
-        self.rdkit_ts = self.multi_reaction.rmg_qm_reaction.reactantGeom.rd_embed(self.rdkit_ts, 15, bm=bm, match=atom_match)[0]
+        self.rdkit_ts = self.multi_reaction.rmg_qm_reaction.reactantGeom.rd_embed(self.rdkit_ts, 150, bm=bm, match=atom_match)[0]
 
     def create_ase_ts_geometry(self):
 
