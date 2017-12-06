@@ -95,7 +95,7 @@ def perform_simple_es(multi_object,
             dihedrals = []
             for index, torsion in enumerate(torsions):
                 i, j, k, l = torsion.indices
-                RHS = torsion.RHS
+                right_mask = torsion.right_mask
 
                 dihedral = random.gauss(top.mean()[index + 1], top.std()[index + 1])
                 dihedrals.append(dihedral)
@@ -104,7 +104,7 @@ def perform_simple_es(multi_object,
                                         a3=k,
                                         a4=l,
                                         angle=float(dihedral),
-                                        indices=RHS)
+                                        mask=right_mask)
 
                 # Updating the molecule
                 if "Multi_Molecule" in str(multi_object.__class__):

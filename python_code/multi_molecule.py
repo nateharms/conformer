@@ -10,23 +10,7 @@ from rmgpy.molecule import Molecule
 import py3Dmol
 import numpy as np
 
-class Torsion():
-    """
-    A class that acts as a container for torsion information.
-    The information stored is as follows:
-
-    * indicies (list of ints): indicies of atoms that describe the dihedral
-    * dihedral (float): the angle (in degrees) of the dihedral
-    * LHS (list of ints): indices of atoms that are branced off the left side of the torsion
-    * RHS (list of ints): indices of atoms that are branced off the right side of the torsion
-    """
-
-    def __init__(self, indices, dihedral, LHS, RHS):
-        self.indices = indices
-        self.dihedral = dihedral
-        self.LHS = LHS
-        self.RHS = RHS
-
+from geometry import *
 
 
 class Multi_Molecule():
@@ -182,27 +166,23 @@ class Multi_Molecule():
             i, j, k, l = indices
 
             dihedral = self.ase_molecule.get_dihedral(i,j,k,l)
-            tor = Torsion(indices=indices, dihedral=dihedral, LHS=[], RHS=[])
-            LHS = self.get_LHS(tor)
-            RHS = self.get_RHS(tor)
+            tor = Torsion(indices=indices, dihedral=dihedral, left_mask=[], right_mask=[])
+            left_mask = self.get_left_mask(tor)
+            right_mask = self.get_right_mask(tor)
 
-            torsions.append(Torsion(indices, dihedral, LHS, RHS))
+            torsions.append(Torsion(indices, dihedral, left_mask, right_mask))
         self.torsions = torsions
         return self.torsions
 
-    def get_LHS(self, Torsion):
+    def get_left_mask(self, Torsion):
 
         rdkit_atoms = self.rdkit_molecule.GetAtoms()
 
         L1, L0, R0, R1 = Torsion.indices
-        rd_atom_L1 = rdkit_atoms[L1]
-        rd_atom_L0 = rdkit_atoms[L0]
-        rd_atom_R0 = rdkit_atoms[R0]
-        rd_atom_R1 = rdkit_atoms[R1]
 
         # trying to get the left hand side of this torsion
-        LHS_atoms_index = [rd_atom_L0.GetIdx(), rd_atom_L1.GetIdx()]
-        RHS_atoms_index = [rd_atom_R0.GetIdx(), rd_atom_R1.GetIdx()]
+        LHS_atoms_index = [L0, L1]
+        RHS_atoms_index = [R0, R1]
 
         complete_LHS = False
         i = 0
@@ -221,21 +201,19 @@ class Multi_Molecule():
             except IndexError:
                 complete_LHS = True
 
-        return LHS_atoms_index
+        left_mask = [index in LHS_atoms_index for index in range(len(self.ase_molecule))]
 
-    def get_RHS(self, Torsion):
+        return left_mask
+
+    def get_right_mask(self, Torsion):
 
         rdkit_atoms = self.rdkit_molecule.GetAtoms()
 
         L1, L0, R0, R1 = Torsion.indices
-        rd_atom_L1 = rdkit_atoms[L1]
-        rd_atom_L0 = rdkit_atoms[L0]
-        rd_atom_R0 = rdkit_atoms[R0]
-        rd_atom_R1 = rdkit_atoms[R1]
 
         # trying to get the left hand side of this torsion
-        LHS_atoms_index = [rd_atom_L0.GetIdx(), rd_atom_L1.GetIdx()]
-        RHS_atoms_index = [rd_atom_R0.GetIdx(), rd_atom_R1.GetIdx()]
+        LHS_atoms_index = [L0, L1]
+        RHS_atoms_index = [R0, R1]
 
         complete_RHS = False
         i = 0
@@ -254,7 +232,9 @@ class Multi_Molecule():
             except IndexError:
                 complete_RHS = True
 
-        return RHS_atoms_index
+        right_mask = [index in RHS_atoms_index for index in range(len(self.ase_molecule))]
+
+        return right_mask
 
     def set_rmg_coords(self, molecule_base):
 

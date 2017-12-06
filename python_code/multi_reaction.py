@@ -36,6 +36,7 @@ from rmgpy.qm.reaction import QMReaction
 from rmgpy.qm.molecule import QMMolecule
 
 from multi_molecule import *
+from geometry import *
 
 
 rmg_database = RMGDatabase()
@@ -200,7 +201,7 @@ class Multi_TS():
 
         bm = self.multi_reaction.rmg_qm_reaction.editMatrix(self.rmg_ts, bm, labels)
 
-        self.rdkit_ts = self.multi_reaction.rmg_qm_reaction.reactantGeom.rd_embed(self.rdkit_ts, 150, bm=bm, match=atom_match)[0]
+        self.rdkit_ts = self.multi_reaction.rmg_qm_reaction.reactantGeom.rd_embed(self.rdkit_ts, 1000, bm=bm, match=atom_match)[0]
 
     def create_ase_ts_geometry(self):
 
@@ -338,29 +339,25 @@ class Multi_TS():
             i, j, k, l = indices
 
             dihedral = self.ase_ts.get_dihedral(i, j, k, l)
-            tor = Torsion(indices=indices, dihedral=dihedral, LHS=[], RHS=[])
-            LHS = self.get_ts_LHS(tor)
-            RHS = self.get_ts_RHS(tor)
+            tor = Torsion(indices=indices, dihedral=dihedral, left_mask=[], right_mask=[])
+            left_mask = self.get_ts_left_mask(tor)
+            right_mask = self.get_ts_right_mask(tor)
 
-            torsions.append(Torsion(indices, dihedral, LHS, RHS))
+            torsions.append(Torsion(indices, dihedral, left_mask, right_mask))
         self.torsions = torsions
         return self.torsions
 
-    def get_ts_RHS(self, Torsion):
+    def get_ts_right_mask(self, Torsion):
 
         rdmol_copy = self.create_pseudo_geometry()
 
         rdkit_atoms = rdmol_copy.GetAtoms()
 
         L1, L0, R0, R1 = Torsion.indices
-        rd_atom_L1 = rdkit_atoms[L1]
-        rd_atom_L0 = rdkit_atoms[L0]
-        rd_atom_R0 = rdkit_atoms[R0]
-        rd_atom_R1 = rdkit_atoms[R1]
 
         # trying to get the left hand side of this torsion
-        LHS_atoms_index = [rd_atom_L0.GetIdx(), rd_atom_L1.GetIdx()]
-        RHS_atoms_index = [rd_atom_R0.GetIdx(), rd_atom_R1.GetIdx()]
+        LHS_atoms_index = [L0, L1]
+        RHS_atoms_index = [R0, R1]
 
         complete_RHS = False
         i = 0
@@ -379,23 +376,21 @@ class Multi_TS():
             except IndexError:
                 complete_RHS = True
 
-        return RHS_atoms_index
+        right_mask = [index in RHS_atoms_index for index in range(len(self.ase_ts))]
 
-    def get_ts_LHS(self, Torsion):
+        return right_mask
+
+    def get_ts_left_mask(self, Torsion):
 
         rdmol_copy = self.create_pseudo_geometry()
 
         rdkit_atoms = rdmol_copy.GetAtoms()
 
         L1, L0, R0, R1 = Torsion.indices
-        rd_atom_L1 = rdkit_atoms[L1]
-        rd_atom_L0 = rdkit_atoms[L0]
-        rd_atom_R0 = rdkit_atoms[R0]
-        rd_atom_R1 = rdkit_atoms[R1]
 
         # trying to get the left hand side of this torsion
-        LHS_atoms_index = [rd_atom_L0.GetIdx(), rd_atom_L1.GetIdx()]
-        RHS_atoms_index = [rd_atom_R0.GetIdx(), rd_atom_R1.GetIdx()]
+        LHS_atoms_index = [L0, L1]
+        RHS_atoms_index = [R0, R1]
 
         complete_LHS = False
         i = 0
@@ -414,7 +409,9 @@ class Multi_TS():
             except IndexError:
                 complete_LHS = True
 
-        return LHS_atoms_index
+        left_mask = [index in LHS_atoms_index for index in range(len(self.ase_ts))]
+
+        return left_mask
 
     def set_rmg_ts_coords(self, molecule_base):
 

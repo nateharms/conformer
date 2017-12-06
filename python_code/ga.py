@@ -108,7 +108,7 @@ def perform_ga(multi_object,
                         dihedral = df.iloc[parent_1, index + 1]
 
                 i, j, k, l = torsion.indices
-                RHS = torsion.RHS
+                right_mask = torsion.right_mask
 
                 dihedrals.append(dihedral)
                 ase_object.set_dihedral(a1=i,
@@ -116,7 +116,7 @@ def perform_ga(multi_object,
                                         a3=k,
                                         a4=l,
                                         angle=float(dihedral),
-                                        indices=RHS)
+                                        mask=right_mask)
 
                 # Updating the molecule
                 if "Multi_Molecule" in str(multi_object.__class__):

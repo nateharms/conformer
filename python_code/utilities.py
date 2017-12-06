@@ -68,15 +68,15 @@ def create_initial_population(multi_object, delta=30, population_size=200):
                 dihedral = np.random.choice(possible_dihedrals)
                 dihedrals.append(dihedral)
                 i, j, k, l = torsion.indices
-                RHS = torsion.RHS
+                right_mask = torsion.right_mask
 
                 torsion_object.ase_molecule.set_dihedral(
-                    a1 = i,
-                    a2 = j,
-                    a3 = k,
-                    a4 = l,
-                    angle = float(dihedral),
-                    indices = RHS
+                    a1=i,
+                    a2=j,
+                    a3=k,
+                    a4=l,
+                    angle=float(dihedral),
+                    mask=right_mask
                 )
 
             torsion_object.update_geometry_from_ase_mol()
@@ -97,7 +97,7 @@ def create_initial_population(multi_object, delta=30, population_size=200):
                 dihedral = np.random.choice(possible_dihedrals)
                 dihedrals.append(dihedral)
                 i, j, k, l = torsion.indices
-                RHS = torsion.RHS
+                right_mask = torsion.right_mask
 
                 torsion_object.ase_ts.set_dihedral(
                     a1=i,
@@ -105,7 +105,7 @@ def create_initial_population(multi_object, delta=30, population_size=200):
                     a3=k,
                     a4=l,
                     angle=float(dihedral),
-                    indices=RHS
+                    mask=right_mask
                 )
 
             torsion_object.update_ts_from_ase_ts()
@@ -126,7 +126,7 @@ def create_initial_population(multi_object, delta=30, population_size=200):
                 dihedral = np.random.choice(possible_dihedrals)
                 dihedrals.append(dihedral)
                 i, j, k, l = torsion.indices
-                RHS = torsion.RHS
+                right_mask = torsion.right_mask
 
                 torsion_object.ase_ts.set_dihedral(
                     a1=i,
@@ -134,7 +134,7 @@ def create_initial_population(multi_object, delta=30, population_size=200):
                     a3=k,
                     a4=l,
                     angle=float(dihedral),
-                    indices=RHS
+                    mask=right_mask
                 )
 
             torsion_object.update_ts_from_ase_ts()
