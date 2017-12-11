@@ -14,7 +14,7 @@ mol = Multi_Molecule("CCCOC")
 mol.ase_molecule.set_calculator(EMT())
 initial_pop = create_initial_population(multi_object=mol)
 
-"""perform_brute_force(mol,
+perform_brute_force(mol,
                     delta=float(30),
                     store_directory="./example_results")
 
@@ -34,7 +34,7 @@ perform_simple_es(mol,
                   tolerance=1e-5,
                   max_generations=5,
                   store_generations=True,
-                  store_directory="./example_results")"""
+                  store_directory="./example_results")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~
 # Performing GA and Simple-ES on a reaction
@@ -43,11 +43,11 @@ rxn = Multi_Reaction("OCCCC+[O]O_OCC[CH]C+OO", "H_Abstraction")
 rxn.multi_ts.ase_ts.set_calculator(EMT())
 rxn_initial_pop = create_initial_population(multi_object=rxn)
 
-"""perform_brute_force(rxn,
+perform_brute_force(rxn,
                     delta=float(30),
-                    store_directory="./example_results")"""
+                    store_directory="./example_results")
 
-"""perform_ga(rxn,
+perform_ga(rxn,
            rxn_initial_pop,
            top_percent=0.3,
            tolerance = 1e-4,
@@ -55,7 +55,7 @@ rxn_initial_pop = create_initial_population(multi_object=rxn)
            store_generations=True,
            store_directory="./example_results",
            mutation_probability=0.2,
-           delta=30)"""
+           delta=30)
 
 perform_simple_es(rxn,
                   rxn_initial_pop,
@@ -63,4 +63,4 @@ perform_simple_es(rxn,
                   tolerance=1e-4,
                   max_generations=5,
                   store_generations=True,
-                  store_directory=".")
+                  store_directory="./example_results")

@@ -190,6 +190,29 @@ class Multi_TS():
         self.create_rmg_ts_geometry()
         self.get_ts_torsion_list()
         self.get_ts_torsions()
+        self.get_ts_angle_indices()
+        self.angle_indices
+        self.get_ts_angle()
+        i, j, k =self.angle_indices
+        r_mask = self.angle.right_mask
+
+        self.ase_ts.set_angle(a1=i, a2=j, a3=k, angle=float(180), mask=r_mask)
+        labels = []
+        for label, atom in self.rmg_ts.getLabeledAtoms().iteritems():
+            labels.append(atom.sortingLabel)
+
+        for torsion in self.torsions:
+            if set(labels).issubset(torsion.indices[:3]):
+                i, j, k, l = torsion.indices
+                r_mask = torsion.right_mask
+
+                self.ase_ts.set_dihedral(a1=i,
+                                         a2=j,
+                                         a3=k,
+                                         a4=l,
+                                         mask=r_mask,
+                                         angle=float(180))
+        self.update_ts_from_ase_ts()
 
     def create_rdkit_ts_geometry(self):
 
@@ -272,6 +295,62 @@ class Multi_TS():
 
         return rdmol_copy
 
+    def get_ts_angle_indices(self):
+        rdmol_copy = self.rdkit_ts.__copy__()
+        rdmol_copy = Chem.RWMol(rdmol_copy)
+        for atom in rdmol_copy.GetAtoms():
+            idx = atom.GetIdx()
+            rmg_atom = self.rmg_ts.atoms[idx]
+
+            if rmg_atom.label:
+                if rmg_atom.label == "*1":
+                    atom1_star = atom
+                if rmg_atom.label == "*2":
+                    atom2_star = atom
+                if rmg_atom.label == "*3":
+                    atom3_star = atom
+
+        if rdmol_copy.GetBondBetweenAtoms(atom1_star.GetIdx(), atom2_star.GetIdx()):
+            bond_list = list(atom3_star.GetBonds())
+
+            for bond in bond_list:
+                atomX = bond.GetOtherAtom(atom3_star)
+                if atomX.GetAtomicNum() == 1 and len(atomX.GetBonds()) == 1:
+                    # This means that we have a terminal hydrogen, skip this
+                    # NOTE: for H_abstraction TSs, a non teminal H should exist
+                    continue
+                if atomX.GetIdx() != atom2_star.GetIdx():
+                    other_atom = atomX
+            angle_indices = [atom2_star.GetIdx(), atom3_star.GetIdx(), other_atom.GetIdx()]
+
+        else:
+            bond_list = list(atom1_star.GetBonds())
+
+            for bond in bond_list:
+                atomX = bond.GetOtherAtom(atom1_star)
+                if atomX.GetAtomicNum() == 1 and len(atomX.GetBonds()) == 1:
+                    # This means that we have a terminal hydrogen, skip this
+                    # NOTE: for H_abstraction TSs, a non teminal H should exist
+                    continue
+                if atomX.GetIdx() != atom2_star.GetIdx():
+                    other_atom = atomX
+
+            angle_indices = [atom2_star.GetIdx(), atom1_star.GetIdx(), other_atom.GetIdx()]
+
+        self.angle_indices = angle_indices
+
+    def get_ts_angle(self):
+
+        i, j, k = self.angle_indices
+        ang = self.ase_ts.get_angle(i, j, k)
+        angle = Angle(indices=self.angle_indices, degree=ang, left_mask=[], right_mask=[])
+        left_mask = self.get_ts_left_mask(angle)
+        right_mask = self.get_ts_right_mask(angle)
+
+        self.angle = Angle(self.angle_indices, ang, left_mask, right_mask)
+
+        return self.angle
+
     def get_ts_torsion_list(self):
 
         rdmol_copy = self.create_pseudo_geometry()
@@ -347,17 +426,24 @@ class Multi_TS():
         self.torsions = torsions
         return self.torsions
 
-    def get_ts_right_mask(self, Torsion):
+    def get_ts_right_mask(self, torsion_or_angle):
 
         rdmol_copy = self.create_pseudo_geometry()
 
         rdkit_atoms = rdmol_copy.GetAtoms()
 
-        L1, L0, R0, R1 = Torsion.indices
+        if "Torsion" in str(torsion_or_angle.__class__):
 
-        # trying to get the left hand side of this torsion
-        LHS_atoms_index = [L0, L1]
-        RHS_atoms_index = [R0, R1]
+            L1, L0, R0, R1 = torsion_or_angle.indices
+
+            # trying to get the left hand side of this torsion
+            LHS_atoms_index = [L0, L1]
+            RHS_atoms_index = [R0, R1]
+
+        elif "Angle" in str(torsion_or_angle.__class__):
+            a1, a2, a3 = torsion_or_angle.indices
+            LHS_atoms_index = [a2, a1]
+            RHS_atoms_index = [a2, a3]
 
         complete_RHS = False
         i = 0
@@ -380,17 +466,25 @@ class Multi_TS():
 
         return right_mask
 
-    def get_ts_left_mask(self, Torsion):
+    def get_ts_left_mask(self, torsion_or_angle):
 
         rdmol_copy = self.create_pseudo_geometry()
 
         rdkit_atoms = rdmol_copy.GetAtoms()
 
-        L1, L0, R0, R1 = Torsion.indices
+        if "Torsion" in str(torsion_or_angle.__class__):
 
-        # trying to get the left hand side of this torsion
-        LHS_atoms_index = [L0, L1]
-        RHS_atoms_index = [R0, R1]
+            L1, L0, R0, R1 = torsion_or_angle.indices
+
+            # trying to get the left hand side of this torsion
+            LHS_atoms_index = [L0, L1]
+            RHS_atoms_index = [R0, R1]
+
+        elif "Angle" in str(torsion_or_angle.__class__):
+            a1, a2, a3 = torsion_or_angle.indices
+            LHS_atoms_index = [a2, a1]
+            RHS_atoms_index = [a2, a3]
+
 
         complete_LHS = False
         i = 0
