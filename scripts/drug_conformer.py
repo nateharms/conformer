@@ -11,7 +11,7 @@ from ase import optimize
 from copy import deepcopy
 import cPickle as pickle
 
-
+mol_dict = {}
 # For this test, we will be looking at Paclitaxel. A commonly used anti-cancer drug
 mol = Multi_Molecule("CC1=C2[C@@]([C@]([C@H]([C@@H]3[C@]4([C@H](OC4)C[C@@H]([C@]3(C(=O)[C@@H]2OC(=O)C)C)O)OC(=O)C)OC(=O)c5ccccc5)(C[C@@H]1OC(=O)[C@H](O)[C@@H](NC(=O)c6ccccc6)c7ccccc7)O)(C)C")
 
@@ -30,24 +30,25 @@ brute_force_results = perform_brute_force(multi_object,
                         store_directory="./drug_conformer_results"):
 
 
-mol_copy = deepcopy(mol)
-for h, tor in enumerate(mol_copy.torsions):
+brute_force_mol = deepcopy(mol)
+for h, tor in enumerate(brute_force_mol.torsions):
     dihedral = brute_force_results.iloc[0][h+1]
     i,j,k,l = tor.indices
     RHS = tor.right_mask
-    mol_copy.ase_molecule.set_dihedral(a1 = i,
-                                       a2 = j,
-                                       a3 = k,
-                                       a4 = l,
-                                       angle= float(dihedral),
-                                       mask=RHS)
-mol_copy.ase_molecule.set_calculator(Gaussian())
+    brute_force_mol.ase_molecule.set_dihedral(a1 = i,
+                                              a2 = j,
+                                              a3 = k,
+                                              a4 = l,
+                                              angle= float(dihedral),
+                                              mask=RHS)
+mol_dict["Brute Force Mol"] = brute_force_mol
 # TODO: Need to import optimizer
 
-opt = optimize.BFGS(atoms=mol_copy.ase_molecule)
+"""brute_force_mol.ase_molecule.set_calculator(Gaussian())
+opt = optimize.BFGS(atoms=mol_copy.brute_force_mol)
 opt.run(fmax=0.05, trajectory='./drug_conformer_results/brute_force_paclitaxel.traj')
 brute_force_pickle = open("./drug_conformer_results/brute_force_final.pkl")
-pickle.dump(mol_copy, brute_force_pickle)
+pickle.dump(brute_force_mol, brute_force_pickle)"""
 
 
 ga_results = perform_ga(mol,
@@ -55,27 +56,28 @@ ga_results = perform_ga(mol,
            top_percent=0.3,
            tolerance=1e-5,
            store_generations=True,
-           store_directory="./drug_conformer_results/",
+           store_directory="/gss_gpfs_scratch/harms.n/drug_conformer_results/",
            mutation_probability=0.2,
            delta=float(30))
 
-mol_copy = deepcopy(mol)
-for h, tor in enumerate(mol_copy.torsions):
+ga_mol = deepcopy(mol)
+for h, tor in enumerate(ga_mol.torsions):
     dihedral = ga_results.iloc[0][h+1]
     i,j,k,l = tor.indices
     RHS = tor.right_mask
-    mol_copy.ase_molecule.set_dihedral(a1 = i,
-                                       a2 = j,
-                                       a3 = k,
-                                       a4 = l,
-                                       angle= float(dihedral),
-                                       mask=RHS)
-mol_copy.ase_molecule.set_calculator(Gaussian())
+    ga_mol.ase_molecule.set_dihedral(a1 = i,
+                                     a2 = j,
+                                     a3 = k,
+                                     a4 = l,
+                                     angle= float(dihedral),
+                                     mask=RHS)
+mol_dict["GA Mol"] = ga_mol
 
-opt = optimize.BFGS(atoms=mol_copy.ase_molecule)
+"""ga_mol.ase_molecule.set_calculator(Gaussian())
+opt = optimize.BFGS(atoms=ga_mol.ase_molecule)
 opt.run(fmax=0.05, trajectory='./drug_conformer_results/ga_paclitaxel.traj')
 ga_pickle = open("./drug_conformer_results/ga_final.pkl")
-pickle.dump(mol_copy, ga_pickle)
+pickle.dump(ga_mol, ga_pickle)"""
 
 simple_es_results = perform_simple_es(mol,
                   initial_pop,
@@ -83,23 +85,27 @@ simple_es_results = perform_simple_es(mol,
                   tolerance=1e-5,
                   max_generations=100,
                   store_generations=True,
-                  store_directory="./drug_conformer_results/")
+                  store_directory="/gss_gpfs_scratch/harms.n/drug_conformer_results/")
 
-mol_copy = deepcopy(mol)
-for h, tor in enumerate(mol_copy.torsions):
+es_mol = deepcopy(mol)
+for h, tor in enumerate(es_mol.torsions):
     dihedral = simple_es_results.iloc[0][h+1]
     i,j,k,l = tor.indices
     RHS = tor.right_mask
-    mol_copy.ase_molecule.set_dihedral(a1 = i,
-                                       a2 = j,
-                                       a3 = k,
-                                       a4 = l,
-                                       angle= float(dihedral),
-                                       mask=RHS)
-mol_copy.ase_molecule.set_calculator(Gaussian())
+    es_mol.ase_molecule.set_dihedral(a1 = i,
+                                     a2 = j,
+                                     a3 = k,
+                                     a4 = l,
+                                     angle= float(dihedral),
+                                     mask=RHS)
 
-opt = optimize.BFGS(atoms=mol_copy.ase_molecule)
+mol_dict["ES Mol"] = es_mol
+"""es_mol.ase_molecule.set_calculator(Gaussian())
+opt = optimize.BFGS(atoms=es_mol.ase_molecule)
 opt.run(fmax=0.05, trajectory='./drug_conformer_results/simple_es_paclitaxel.traj')
 mol_copy.update_geometry_from_ase_mol()
 simple_es_pickle = open("./drug_conformer_results/simple_es_final.pkl")
-pickle.dump(mol_copy, simple_es_pickle)
+pickle.dump(es_mol, simple_es_pickle)"""
+
+f = open("/gss_gpfs_scratch/harms.n/drug_conformer_results/mol_list.pkl", "w")
+pickle.dump(mol_dict, f)
