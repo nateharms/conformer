@@ -11,9 +11,6 @@ import random
 import numpy as np
 from numpy import array
 import pandas as pd
-import matplotlib
-from matplotlib import pyplot as plt
-import seaborn as sns
 
 
 # do this before we have a chance to import openbabel!

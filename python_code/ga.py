@@ -9,8 +9,6 @@ import random
 import numpy as np
 from numpy import array
 import pandas as pd
-import matplotlib
-from matplotlib import pyplot as plt
 import cPickle as pickle
 
 
