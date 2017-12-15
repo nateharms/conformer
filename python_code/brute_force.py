@@ -80,13 +80,13 @@ def perform_brute_force(multi_object,
             angle = torsion[1]
 
             i, j, k, l = tor.indices
-            RHS = tor.RHS
+            right_mask = tor.right_mask
             ase_object.set_dihedral(a1=i,
                                     a2=j,
                                     a3=k,
                                     a4=l,
                                     angle=float(angle),
-                                    indices=RHS)
+                                    mask=right_mask)
 
         results.append([ase_object.get_potential_energy()] + list(combo))
     brute_force = pd.DataFrame(results)
