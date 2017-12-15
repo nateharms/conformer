@@ -49,8 +49,9 @@ rmg_database.load(database_path,
                  thermoLibraries=['primaryThermoLibrary', 'KlippensteinH2O2', 'thermo_DFT_CCSDTF12_BAC', 'CBS_QB3_1dHR' ],
                  solvation=False,
                  )
-
-f = open("/Users/nathan/Code/ga_conformer/python_code/ts_database.pkl", "r")
+home = os.path.expandvars("$HOME")
+ts_file = home + "/Code/ga_conformer/python_code/ts_database.pkl"
+f = open(ts_file, "r")
 ts_database = pkl.load(f)
 
 settings = QMSettings(
