@@ -101,4 +101,4 @@ def perform_brute_force(multi_object,
     f = open(os.path.join(store_directory, file_name), "w")
     pickle.dump(brute_force, f)
 
-    return brute_force
+    return
