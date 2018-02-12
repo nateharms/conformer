@@ -25,9 +25,9 @@ mol.ase_molecule.set_calculator(EMT())
 initial_pop = create_initial_population(multi_object=mol, delta=float(30), population_size=population_size)
 
 
-brute_force_results = perform_brute_force(multi_object,
+brute_force_results = perform_brute_force(mol,
                         delta=float(30),
-                        store_directory="./drug_conformer_results"):
+                        store_directory="/gss_gpfs_scratch/harms.n/drug_conformer_results/")
 
 
 brute_force_mol = deepcopy(mol)
