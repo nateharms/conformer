@@ -86,7 +86,7 @@ def perform_simple_es(multi_object,
     while complete == False:
         gen_number += 1
         logging.info("Performing Simple ES on generation {}".format(gen_number))
-
+        
         results = []
         for individual in range(population_size):
             dihedrals = []
