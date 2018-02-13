@@ -67,8 +67,8 @@ print "Job number {0} is the optimization of {1}.".format(job_number, name)
 if not os.path.exists("/home/harms.n/Code/ga_conformer/results/{0}_{1}.xyz".format(name, job_number)):
     print "New job, running it"
 
-    if name == "Gly":
-        print "Oops, this is the wrong glycine"
+    if name != "Gly":
+        print "Oops, this is the not glycine"
         sys.exit()
 
 
