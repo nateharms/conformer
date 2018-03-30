@@ -23,7 +23,7 @@
 #SBATCH -N 1
 
 #an array job
-#SBATCH --array=1-351
+#SBATCH --array=1-701
 
 
 #####################################################
@@ -34,4 +34,4 @@ echo $SLURM_ARRAY_TASK_ID
 cd /gss_gpfs_scratch/harms.n/drug_conformer
 # the "stdbuf -o0 -e0"  and the "-u" are to disable buffering,
 # so that you see output from the script in the log files immediately.
-stdbuf -o0 -e0 python -u ~/Code/ga_conformer/scripts/aa_conformer.py > /gss_gpfs_scratch/harms.n/drug_conformer/aa_conformer.long_run.$SLURM_ARRAY_TASK_ID.combined.log 2>&1
+stdbuf -o0 -e0 python -u ~/Code/ga_conformer/scripts/conformer.py > /gss_gpfs_scratch/harms.n/drug_conformer/aa_conformer.$SLURM_ARRAY_TASK_ID.combined.log 2>&1
