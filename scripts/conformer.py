@@ -59,7 +59,7 @@ ith = (i - (i%7)) / 7
 print "Job number {0} is the {1}th optimization of {2}.".format(job_number, ith, name)
 
 
-mol = Autotst_Molecule(smiles)
+mol = AutoTST_Molecule(smiles)
 mol.ase_molecule.set_calculator(EMT())
 
 initial_pop = create_initial_population(mol)
@@ -74,8 +74,8 @@ else:
 for i, dihedral in enumerate(top_pop.iloc[0,1:]):
     tor = mol.torsions[i]
     mol.ase_molecule.set_dihedral(tor.indices, angle=dihedral, mask=tor.right_mask)
-mol.update_geometry_from_ase_mol()
-label = "{0}_{1}_{2}".format(t, smiles, ith)
+mol.update_from_ase_mol()
+label = "{0}_{1}_{2}".format(t, name, ith)
 calc = Gaussian(mem="5GB", nprocshared="20", label=label, scratch="/gss_gpfs_scratch/harms.n/drug_conformer/log_files", method="m062x", basis="6-311+g(2df,2p)")
 mol.ase_molecule.set_calculator(calc = calc)
 opt = BFGS(mol.ase_molecule)
@@ -83,5 +83,4 @@ opt.run()
 
 
 
-mol.ase_molecule.write(os.path.join("/gss_gpfs_scratch/harms.n/drug_conformer/results", label + ".xyz")
-
+mol.ase_molecule.write(os.path.join("/gss_gpfs_scratch/harms.n/drug_conformer/results", label + ".xyz"))

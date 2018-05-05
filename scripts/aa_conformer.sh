@@ -31,7 +31,7 @@
 #python $RMGpy/scripts/filterReactions.py /scratch/westgroup/Importer/RMG-models/
 ## that creates the kineticsDict files, and doesn't need repeating until the imported models change significantly
 echo $SLURM_ARRAY_TASK_ID
-cd /gss_gpfs_scratch/harms.n/drug_conformer
+cd /gss_gpfs_scratch/harms.n/drug_conformer/log_files
 # the "stdbuf -o0 -e0"  and the "-u" are to disable buffering,
 # so that you see output from the script in the log files immediately.
 stdbuf -o0 -e0 python -u ~/Code/ga_conformer/scripts/conformer.py > /gss_gpfs_scratch/harms.n/drug_conformer/aa_conformer.$SLURM_ARRAY_TASK_ID.combined.log 2>&1

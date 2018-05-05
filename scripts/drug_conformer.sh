@@ -38,4 +38,6 @@ echo $SLURM_ARRAY_TASK_ID
 # the "stdbuf -o0 -e0"  and the "-u" are to disable buffering,
 # so that you see output from the script in the log files immediately.
 
+source activate rmg_env
+
 python ~/Code/ga_conformer/scripts/drug_conformer.py
