@@ -1,21 +1,15 @@
-import rdkit
-from rdkit import Chem
-from rdkit.Chem import AllChem
-from multi_molecule import Multi_Molecule
-
-import ase
 import os
 import sys
-from ase import io
-from ase.visualize import view
-import pandas as pd
+from autotst.molecule import *
+import ase
+from ase.io import read
 from ase.calculators.gaussian import Gaussian
 from ase.optimize import BFGS
 import logging
+
 FORMAT = "%(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s"
 logging.basicConfig(format=FORMAT, level=logging.INFO)
-#%matplotlib inline
-#import matplotlib.pyplot as plt
+
 
 if len(sys.argv)>1:
     job_number = int(sys.argv[-1])
@@ -27,26 +21,50 @@ else:
     #raise Exception("Specif y a TS number!")
     logging.warning("Number not specified as script argument or via environment variable, so using default")
     job_number = 1
-#i = i + 999 #### ADDED THIS LINE TO GET ARRAY OVER 1000 FOR SLURM
+
 logging.info("RUNNING WITH JOB NUMBER i = {}".format(job_number))
 
 i = job_number - 1
 
+path = "../external_databae/{}/uncapped/bare"
 
-master = os.listdir("/home/harms.n/Code/ga_conformer/master/")
+mols_of_interest = [
+    "ala",
+    "gly",
+    "ile",
+    "leu",
+    "phe",
+    "trp",
+    "val"
+]
 
+files_to_optimize = []
+for mol in mols_of_interest:
+    
+    list_dir =  os.listdir(path.format(mol))
+    for f in list_dir:
+        if f.endswith(".xyz"):
+            files_to_optimize.append(os.path.join(path.format(mol), f))
 
-m = master[i]
-name = m.split("_")[0]
-am = io.read("/home/harms.n/Code/ga_conformer/master/" + m)
-print "Reading in the following file: {}".format(m)
+file_of_interest = files_to_optimize[i]
 
-label = "{}_master".format(name)
+atoms = read(file_of_interest)
 
-calc = Gaussian(mem="5GB", nprocshared="20", label=label, scratch="/gss_gpfs_scratch/harms.n/drug_conformer", method="m062x", basis="6-311+g(2df,2p)")
+scratch = "/gss_gpfs_scratch/harms.n/conformers/database_optimizations"
 
-am.set_calculator(calc)
-opt = BFGS(am)
+os.chdir(scratch)
+
+calc = Gaussian(mem="5GB",
+                nprocshared=20,
+                label=file_of_interest[20:-4].replace("/","_"),
+                scratch=scratch,
+                method="b3lyp",
+                basis="6-311+g(2df,2p)",
+                multiplicity=1
+                )
+
+atoms.set_calculator(calc)
+opt = BFGS(atoms=atoms)
 opt.run()
-
-am.write("~/Code/ga_conformer/master/{0}_master_optimized.xyz".format(name, job_number))
+print "The potential energy of {} is:".format(file_of_interest[20:-4].replace("/","_"))
+print atoms.get_potential_energy()

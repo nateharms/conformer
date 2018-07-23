@@ -1,0 +1,7 @@
+# Relative energy hierarchy for Gly conformations
+# Calculated with PBE+vdW (tier 2 basis)
+# Conf.    Energy./ [eV]     Rel. energy./ [eV]
+#
+   1  -94931.5744723   0.000000
+   2  -94931.0702177   0.504255
+   3  -94930.9218593   0.652613

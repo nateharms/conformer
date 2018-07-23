@@ -22,7 +22,7 @@
 #SBATCH -N 1
 
 #an array job
-#SBATCH --array=1-8
+#SBATCH --array=1-289
 
 
 #####################################################
@@ -30,7 +30,7 @@
 #python $RMGpy/scripts/filterReactions.py /scratch/westgroup/Importer/RMG-models/
 ## that creates the kineticsDict files, and doesn't need repeating until the imported models change significantly
 echo $SLURM_ARRAY_TASK_ID
-cd /gss_gpfs_scratch/harms.n/drug_conformer
+source activate rmg_env
 # the "stdbuf -o0 -e0"  and the "-u" are to disable buffering,
 # so that you see output from the script in the log files immediately.
-stdbuf -o0 -e0 python -u ~/Code/ga_conformer/scripts/optimizing_others.py > /gss_gpfs_scratch/harms.n/drug_conformer/optimizing_others.$SLURM_ARRAY_TASK_ID.combined.log 2>&1
+stdbuf -o0 -e0 python -u ~/Code/conformer/scripts/optimizing_others.py > /gss_gpfs_scratch/harms.n/conformers/database_optimizations/log_files/optimizing_others.$SLURM_ARRAY_TASK_ID.combined.log 2>&1

@@ -1,0 +1,6 @@
+# Relative energy hierarchy for Ala conformations
+# Calculated with PBE+vdW (tier 2 basis)
+# Conf.    Energy./ [eV]     Rel. energy./ [eV]
+   1  -562207.321593   0.000000
+   2  -562207.038608   0.282985
+   3  -562206.751921   0.569672

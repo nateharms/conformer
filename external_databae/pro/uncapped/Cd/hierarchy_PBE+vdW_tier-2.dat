@@ -1,0 +1,10 @@
+# Relative energy hierarchy for Pro conformations
+# Calculated with PBE+vdW (tier 2 basis)
+# Conf.    Energy./ [eV]     Rel. energy./ [eV]
+#
+   1  -165035.324562   0.000000
+   2  -165035.297022   0.027540
+   3  -165034.941548   0.383014
+   4  -165034.923152   0.401410
+   5  -165034.697095   0.627467
+   6  -165034.680723   0.643839
