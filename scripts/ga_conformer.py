@@ -22,6 +22,7 @@ from rmgpy.reaction import Reaction
 from ase.optimize import BFGS
 from hotbit.aseinterface import Hotbit
 from ase.calculators.gaussian import *
+from ase.io.xyz import write_xyz
 
 from autotst.molecule import *
 from autotst.conformer.utilities  import *
@@ -75,21 +76,14 @@ from time import time
 
 t_0 = time()
 
-for combo, energy in confs.itervalues():
+for ind, combo in enumerate(confs.iterkeys()):
     for index, tor in enumerate(non_terminal_torsions):
         dihedral = combo[index]
         mol.ase_molecule.set_dihedral(tor.indices, angle=dihedral, mask=tor.right_mask)
 
     mol.update_from_ase_mol()
-    label = "{0}_{1}_{2}_{3}".format(name, "ga", ith, index)
-    calc = Gaussian(label=label, scratch="/gss_gpfs_scratch/harms.n/conformer/ga", method="m062x", basis="6-311+g(2df,2p)")
-    mol.ase_molecule.set_calculator(calc = calc)
-    try:
-        opt = BFGS(mol.ase_molecule)
-        opt.run()
-        energy = mol.ase_molecule.get_potential_energy()
-    except:
-        logging.info("The optimization failed for the following combo:")
-        print "\t{}".format(combo)
+    label = "{0}_{1}_{2}_{3}.xyz".format(name, "ga", ith, ind)
 
+    f = open(label, "w")
+    write_xyz(f, mol.ase_molecule)
 logging.info("This process took: {} s".format(time() - t_0))
