@@ -4,6 +4,7 @@ from autotst.molecule import *
 import ase
 from ase.io import read
 from ase.calculators.gaussian import Gaussian
+from ase.calculators.nwchem import NWChem
 from ase.optimize import BFGS
 import logging
 
@@ -50,21 +51,21 @@ file_of_interest = files_to_optimize[i]
 
 atoms = read(file_of_interest)
 
-scratch = "/gss_gpfs_scratch/harms.n/conformers/database_optimizations"
+scratch = "/projects/CPOX/northeastern_comocheng/conformers/optimizing_others/"
 
 os.chdir(scratch)
 
-calc = Gaussian(mem="5GB",
-                nprocshared=20,
+calc = NWChem(
                 label=file_of_interest[20:-4].replace("/","_"),
                 scratch=scratch,
-                method="b3lyp",
-                basis="6-311+g(2df,2p)",
+                method="m06-2x",
+                basis="6-311++G(2D,2P)",
                 multiplicity=1
                 )
 
 atoms.set_calculator(calc)
 opt = BFGS(atoms=atoms)
 opt.run()
+print 
 print "The potential energy of {} is:".format(file_of_interest[20:-4].replace("/","_"))
 print atoms.get_potential_energy()

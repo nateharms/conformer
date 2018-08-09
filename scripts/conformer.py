@@ -22,11 +22,12 @@ from rmgpy.reaction import Reaction
 from ase.optimize import BFGS
 from hotbit.aseinterface import Hotbit
 from ase.calculators.gaussian import *
+from ase.calculators.nwchem import *
 
 from autotst.molecule import *
 from autotst.conformer.utilities  import *
 from autotst.conformer.ga import *
-from autotst.conformer.simple_es import *
+#from autotst.conformer.simple_es import *
 
 if len(sys.argv)>1:
     job_number = int(sys.argv[-1])
@@ -58,14 +59,14 @@ name, smiles = list(smiles_dict.iteritems())[i % 7]
 ith = (i - (i%7)) / 7
 print "Job number {0} is the {1}th optimization of {2}.".format(job_number, ith, name)
 
-if not name in os.listdir("/gss_gpfs_scratch/harms.n/conformer/ga"):
+if not name in os.listdir("/projects/CPOX/northeastern_comocheng/conformers/optimizing_others/"):
     os.mkdir(name)
-os.chdir("/gss_gpfs_scratch/harms.n/conformer/ga/{}".format(name))
+os.chdir("/projects/CPOX/northeastern_comocheng/conformers/optimizing_others/{}".format(name))
 
 mol = AutoTST_Molecule(smiles)
 mol.ase_molecule.set_calculator(Hotbit())
 
-final, confs = perform_ga(mol)
+final, confs = perform_ga(mol, min_rms=60)
 non_terminal_torsions = find_terminal_torsions(mol)
 
 logging.info("The dictonary corresponding to the conformer analysis is:")
@@ -82,7 +83,7 @@ for combo, energy in confs.itervalues():
 
     mol.update_from_ase_mol()
     label = "{0}_{1}_{2}_{3}".format(name, "ga", ith, index)
-    calc = Gaussian(label=label, scratch="/gss_gpfs_scratch/harms.n/conformer/ga", method="m062x", basis="6-311+g(2df,2p)")
+    calc = NWChem(label=label, scratch="/projects/CPOX/northeastern_comocheng/conformers/optimizing_others/", method="m06-2x", basis="6-311++G(2D,2P)")
     mol.ase_molecule.set_calculator(calc = calc)
     try:
         opt = BFGS(mol.ase_molecule)
