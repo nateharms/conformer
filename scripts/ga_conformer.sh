@@ -17,7 +17,7 @@
 ##SBATCH --ntasks-per-node=2
 ##SBATCH --exclusive
 
-#SBATCH -p west
+#SBATCH -p ser-par-10g-2
 
 #number of nodes to distribute n tasks across
 #SBATCH -N 1
@@ -30,8 +30,9 @@
 
 #python $RMGpy/scripts/filterReactions.py /scratch/westgroup/Importer/RMG-models/
 ## that creates the kineticsDict files, and doesn't need repeating until the imported models change significantly
+source activate rmg_env
+export PYTHONPATH=/home/harms.n/Code/RMG-Py:/home/harms.n/Code/AutoTST:/home/harms.n/Code/PyTeCK:/home/harms.n/Code/cantera/build/python2:/home/harms.n/Code/hotbit/lib/python
 echo $SLURM_ARRAY_TASK_ID
-cd /gss_gpfs_scratch/harms.n/drug_conformer/log_files
 # the "stdbuf -o0 -e0"  and the "-u" are to disable buffering,
 # so that you see output from the script in the log files immediately.
-stdbuf -o0 -e0 python -u ~/Code/ga_conformer/scripts/ga_conformer.py > /gss_gpfs_scratch/harms.n/conformer/aa_conformer.$SLURM_ARRAY_TASK_ID.combined.log 2>&1
+stdbuf -o0 -e0 python -u ~/Code/conformer/scripts/ga_conformer.py > /gss_gpfs_scratch/harms.n/conformers/aa_conformer.$SLURM_ARRAY_TASK_ID.combined.log 2>&1

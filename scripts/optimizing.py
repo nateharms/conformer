@@ -63,7 +63,7 @@ print "We are optimizing this file:\t{}".format(file_of_interest)
 
 atoms = read(file_of_interest)
 
-scratch = "/gss_gpfs_scratch/harms.n/conformers/new_ga"
+scratch = "/gss_gpfs_scratch/harms.n/conformers/"
 
 ff = file_of_interest.split("/")[-1]
 label = ff.split(".")[0]
