@@ -16,7 +16,7 @@
 #SBATCH -n 10
 ##SBATCH --ntasks-per-node=2
 ##SBATCH --exclusive
-
+#SBATCH -p par-gpu
 
 #number of nodes to distribute n tasks across
 #SBATCH -N 1

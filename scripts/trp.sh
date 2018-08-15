@@ -17,7 +17,7 @@
 ##SBATCH --ntasks-per-node=2
 ##SBATCH --exclusive
 
-
+#SBATCH -p west
 #number of nodes to distribute n tasks across
 #SBATCH -N 1
 

@@ -58,16 +58,16 @@ i = job_number - 1
 name, smiles = list(smiles_dict.iteritems())[i % 7]
 ith = (i - (i%7)) / 7
 print "Job number {0} is the {1}th optimization of {2}.".format(job_number, ith, name)
-
-if not name in os.listdir("/gss_gpfs_scratch/harms.n/conformer/ga"):
+os.chdir("/gss_gpfs_scratch/harms.n/conformers/new_ga/")
+if not name in os.listdir("/gss_gpfs_scratch/harms.n/conformers/new_ga"):
     os.mkdir(name)
-os.chdir("/gss_gpfs_scratch/harms.n/conformer/ga/{}".format(name))
+os.chdir(name)
 
 mol = AutoTST_Molecule(smiles)
 mol.ase_molecule.set_calculator(Hotbit())
 
-final, confs = perform_ga(mol)
-non_terminal_torsions = find_terminal_torsions(mol)
+final, confs = perform_ga(autotst_object = mol, min_rms=30)
+_, non_terminal_torsions = find_terminal_torsions(mol)
 
 logging.info("The dictonary corresponding to the conformer analysis is:")
 print("\t{}".format(confs))
