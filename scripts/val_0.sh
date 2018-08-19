@@ -1,12 +1,12 @@
 #!/bin/sh
 #set a job name
-#SBATCH --job-name=val_0
+#SBATCH --job-name=val_es
 
 #a file for job output, you can check job progress
-#SBATCH --output=val_0.%a.slurm.log
+#SBATCH --output=val_es.%a.slurm.log
 
 # a file for errors from the job
-#SBATCH --error=val_0.%a.slurm.log
+#SBATCH --error=val_es.%a.slurm.log
 
 #time you think you need; default is one day
 # d-hh:mm:ss
@@ -16,6 +16,7 @@
 #SBATCH -n 10
 ##SBATCH --ntasks-per-node=2
 ##SBATCH --exclusive
+#SBATCH -p ser-par-10g
 
 
 #number of nodes to distribute n tasks across
@@ -32,4 +33,4 @@ echo $SLURM_ARRAY_TASK_ID
 source activate rmg_env
 # the "stdbuf -o0 -e0"  and the "-u" are to disable buffering,
 # so that you see output from the script in the log files immediately.
-stdbuf -o0 -e0 python -u ~/Code/conformer/scripts/optimizing.py 7 > /gss_gpfs_scratch/harms.n/conformers/new_ga_results/log_files/val_0.$SLURM_ARRAY_TASK_ID.combined.log 2>&1
+stdbuf -o0 -e0 python -u ~/Code/conformer/scripts/optimizing.py 7 > /gss_gpfs_scratch/harms.n/conformers/es_results/log_files/val.$SLURM_ARRAY_TASK_ID.combined.log 2>&1

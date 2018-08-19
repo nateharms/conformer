@@ -1,6 +1,6 @@
 #!/bin/sh
 #set a job name
-#SBATCH --job-name=ile
+#SBATCH --job-name=ile_es
 
 #a file for job output, you can check job progress
 #SBATCH --output=ile.%a.slurm.log
@@ -16,13 +16,13 @@
 #SBATCH -n 10
 ##SBATCH --ntasks-per-node=2
 ##SBATCH --exclusive
-
+#SBATCH -p ser-par-10g-4
 
 #number of nodes to distribute n tasks across
 #SBATCH -N 1
 
 #an array job
-#SBATCH --array=1-637
+#SBATCH --array=1-999
 
 
 #####################################################
@@ -32,4 +32,4 @@ echo $SLURM_ARRAY_TASK_ID
 source activate rmg_env
 # the "stdbuf -o0 -e0"  and the "-u" are to disable buffering,
 # so that you see output from the script in the log files immediately.
-stdbuf -o0 -e0 python -u ~/Code/conformer/scripts/optimizing.py 3 > /gss_gpfs_scratch/harms.n/conformers/new_ga_results/log_files/ile.$SLURM_ARRAY_TASK_ID.combined.log 2>&1
+stdbuf -o0 -e0 python -u ~/Code/conformer/scripts/optimizing.py 3 > /gss_gpfs_scratch/harms.n/conformers/es_results/log_files/ile.$SLURM_ARRAY_TASK_ID.combined.log 2>&1

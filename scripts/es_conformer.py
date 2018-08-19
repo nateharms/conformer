@@ -66,8 +66,8 @@ os.chdir("/gss_gpfs_scratch/harms.n/conformers/es/{}".format(name))
 mol = AutoTST_Molecule(smiles)
 mol.ase_molecule.set_calculator(Hotbit())
 
-final, confs = perform_simple_es(mol)
-non_terminal_torsions = find_terminal_torsions(mol)
+final, confs = perform_simple_es(mol, min_rms=60)
+_, non_terminal_torsions = find_terminal_torsions(mol)
 
 logging.info("The dictonary corresponding to the conformer analysis is:")
 print("\t{}".format(confs))

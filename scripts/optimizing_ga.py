@@ -27,7 +27,7 @@ logging.info("RUNNING WITH JOB NUMBER i = {}".format(job_number))
 
 i = job_number - 1
 
-path = "/gss_gpfs_scratch/harms.n/conformers/es/{}"
+path = "/gss_gpfs_scratch/harms.n/conformers/new_ga/{}"
 
 mols_of_interest = [
     "Ala",
@@ -84,7 +84,7 @@ atoms.set_calculator(calc)
 opt = BFGS(atoms=atoms)
 opt.run()
 
-results_path = os.path.join("/gss_gpfs_scratch/harms.n/conformers/es_results", mol, file_of_interest)
+results_path = os.path.join("/gss_gpfs_scratch/harms.n/conformers/new_ga_results", mol, file_of_interest)
 
 
 f = open(results_path, "w")

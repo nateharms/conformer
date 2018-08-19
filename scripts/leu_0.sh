@@ -1,6 +1,6 @@
 #!/bin/sh
 #set a job name
-#SBATCH --job-name=leu_0
+#SBATCH --job-name=leu_es
 
 #a file for job output, you can check job progress
 #SBATCH --output=leu_0.%a.slurm.log
@@ -32,4 +32,4 @@ echo $SLURM_ARRAY_TASK_ID
 source activate rmg_env
 # the "stdbuf -o0 -e0"  and the "-u" are to disable buffering,
 # so that you see output from the script in the log files immediately.
-stdbuf -o0 -e0 python -u ~/Code/conformer/scripts/optimizing.py 4 > /gss_gpfs_scratch/harms.n/conformers/new_ga_results/log_files/leu_0.$SLURM_ARRAY_TASK_ID.combined.log 2>&1
+stdbuf -o0 -e0 python -u ~/Code/conformer/scripts/optimizing.py 4 > /gss_gpfs_scratch/harms.n/conformers/es_results/log_files/leu_0.$SLURM_ARRAY_TASK_ID.combined.log 2>&1

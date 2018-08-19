@@ -23,7 +23,7 @@
 #SBATCH -N 1
 
 #an array job
-#SBATCH --array=1-77
+#SBATCH --array=1-350
 
 
 #####################################################
@@ -31,6 +31,7 @@
 #python $RMGpy/scripts/filterReactions.py /scratch/westgroup/Importer/RMG-models/
 ## that creates the kineticsDict files, and doesn't need repeating until the imported models change significantly
 echo $SLURM_ARRAY_TASK_ID
+export PYTHONPATH=/home/harms.n/Code/RMG-Py:/home/harms.n/Code/AutoTST:/home/harms.n/Code/PyTeCK:/home/harms.n/Code/cantera/build/python2:/home/harms.n/Code/hotbit/lib/python
 cd /gss_gpfs_scratch/harms.n/conformers/es/
 # the "stdbuf -o0 -e0"  and the "-u" are to disable buffering,
 # so that you see output from the script in the log files immediately.
